@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
           path: advent-of-code-inputs
           repository: zodac-personal/advent-of-code-inputs
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.SUBMODULE_ACCESS }}
 
       - name: Cache local .m2
         uses: actions/cache@v4
