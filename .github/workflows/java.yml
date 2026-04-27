@@ -11,6 +11,7 @@ on:
       - 'create.sh'
       - 'LICENSE'
       - 'README.md'
+  workflow_dispatch: # allows manual trigger
 
 jobs:
   build:
@@ -18,12 +19,12 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
 
       - name: Checkout submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
           path: advent-of-code-inputs
@@ -31,7 +32,7 @@ jobs:
           token: ${{ secrets.SUBMODULE_ACCESS }}
 
       - name: Cache local .m2
-        uses: actions/cache@v4
+        uses: actions/cache@v5.0.5
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -39,7 +40,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Setup Maven Action
-        uses: s4u/setup-maven-action@v1.18.0
+        uses: s4u/setup-maven-action@v1.20.0
         with:
           checkout-fetch-depth: 0
           java-distribution: 'temurin'
