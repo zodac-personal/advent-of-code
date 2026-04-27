@@ -64,7 +64,8 @@ public final class BingoBoard {
         int index = 0;
         for (int row = 0; row < boardSize; row++) {
             for (int column = 0; column < boardSize; column++) {
-                final int value = boardNumbers.get(index++);
+                final int value = boardNumbers.get(index);
+                index++;
 
                 board[row][column] = value;
                 cellsAndIndex.put(value, Pair.of(row, column));
