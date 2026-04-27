@@ -47,6 +47,13 @@ at: `advent-of-code/advent-of-code-inputs/2015/day01.txt`.
 I use the [create.sh script](./create.sh) to generate a template for my solution files, and it also retrieves the input for the problem and commits it
 to the git submodule. This requires an environment variable `AOC_COOKIE` to be set, with your own [Advent of Code](https://adventofcode.com/) cookie.
 
+My inputs can be loaded with:
+
+```shell
+git submodule sync
+git submodule update --init --recursive
+```
+
 ## License
 
 The source code is released under the [BSD Zero Clause License](https://opensource.org/licenses/0BSD).

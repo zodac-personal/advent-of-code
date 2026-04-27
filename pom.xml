@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.zodac</groupId>
@@ -53,6 +52,7 @@
         <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
         <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
         <maven-surefire-plugin.version>3.5.5</maven-surefire-plugin.version>
+        <sortpom-maven-plugin.version>4.0.0</sortpom-maven-plugin.version>
         <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
 
         <!-- Linter 3PP Versions -->
@@ -99,6 +99,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- 3PP Dependencies -->
             <!-- Included so the dependency is picked up by 'mvn versions:update-properties', not actually used -->
             <dependency>
@@ -110,8 +117,8 @@
             <dependency>
                 <groupId>org.jspecify</groupId>
                 <artifactId>jspecify</artifactId>
-                <scope>provided</scope>
                 <version>${jspecify.version}</version>
+                <scope>provided</scope>
             </dependency>
             <!-- Provides @NonNull/@Nullable compile-time checks for NullAway -->
             <dependency>
@@ -134,13 +141,6 @@
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj-core.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>${junit-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -169,63 +169,6 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>${maven-clean-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>${maven-compiler-plugin.version}</version>
-                    <configuration>
-                        <release>${java-release}</release>
-                        <showWarnings>false</showWarnings>
-
-                        <!-- Configuration for errorprone compiler checks -->
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>com.google.errorprone</groupId>
-                                <artifactId>error_prone_core</artifactId>
-                                <version>${error_prone_core.version}</version>
-                            </path>
-                            <path>
-                                <groupId>com.uber.nullaway</groupId>
-                                <artifactId>nullaway</artifactId>
-                                <version>${nullaway.version}</version>
-                            </path>
-                        </annotationProcessorPaths>
-                        <fork>true</fork>
-                        <compilerArgs>
-                            <arg>-Xlint:all</arg>
-                            <arg>-Xdoclint:all</arg>
-                            <!-- Configuration for ErrorProne -->
-                            <arg>-XDcompilePolicy=simple</arg>
-                            <arg>--should-stop=ifError=FLOW</arg>
-                            <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=${project.groupId}</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
-                        </compilerArgs>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>${maven-install-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven-jar-plugin.version}</version>
                 </plugin>
 
                 <!-- Test Execution -->
@@ -256,6 +199,12 @@
                     </configuration>
                     <executions>
                         <execution>
+                            <id>default-check</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                        <execution>
                             <id>default-prepare-agent</id>
                             <goals>
                                 <goal>prepare-agent</goal>
@@ -267,45 +216,7 @@
                                 <goal>report</goal>
                             </goals>
                         </execution>
-                        <execution>
-                            <id>default-check</id>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${maven-surefire-plugin.version}</version>
-                    <configuration>
-                        <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
-                        <skipTests>${skip-tests}</skipTests>
-                        <includes>
-                            <include>**/*Test.java</include>
-                        </includes>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>versions-maven-plugin</artifactId>
-                    <version>${versions-maven-plugin.version}</version>
-                    <configuration>
-                        <!-- List of dependencies to not be updated, due to incompatible versions -->
-                        <!-- If a valid update becomes available, it can be updated and removed from below -->
-                        <excludes/>
-                        <generateBackupPoms>false</generateBackupPoms>
-                        <ruleSet>
-                            <ignoreVersions>
-                                <!-- Exclude alpha, beta, milestone and SNAPSHOT releases -->
-                                <ignoreVersion>
-                                    <type>regex</type>
-                                    <version>.*(-alpha|-beta|-M\d|-SNAPSHOT).*</version>
-                                </ignoreVersion>
-                            </ignoreVersions>
-                        </ruleSet>
-                    </configuration>
                 </plugin>
 
                 <!-- Linters -->
@@ -371,14 +282,6 @@
                         <skip>${skip-linters}</skip>
                         <violationSeverity>info</violationSeverity>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                            <phase>validate</phase>
-                        </execution>
-                    </executions>
 
                     <!-- Overwrite the default version of Checkstyle -->
                     <dependencies>
@@ -388,6 +291,61 @@
                             <version>${checkstyle.version}</version>
                         </dependency>
                     </dependencies>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>validate</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven-clean-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <release>${java-release}</release>
+                        <showWarnings>false</showWarnings>
+
+                        <!-- Configuration for errorprone compiler checks -->
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>com.google.errorprone</groupId>
+                                <artifactId>error_prone_core</artifactId>
+                                <version>${error_prone_core.version}</version>
+                            </path>
+                            <path>
+                                <groupId>com.uber.nullaway</groupId>
+                                <artifactId>nullaway</artifactId>
+                                <version>${nullaway.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                        <fork>true</fork>
+                        <compilerArgs>
+                            <arg>-Xlint:all</arg>
+                            <arg>-Xdoclint:all</arg>
+                            <!-- Configuration for ErrorProne -->
+                            <arg>-XDcompilePolicy=simple</arg>
+                            <arg>--should-stop=ifError=FLOW</arg>
+                            <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=${project.groupId}</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                        </compilerArgs>
+                    </configuration>
                 </plugin>
 
                 <!-- Manual execution: -->
@@ -427,6 +385,16 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven-install-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
 
                 <!-- Manual execution: -->
                 <!-- mvn javadoc:javadoc -Dlint -->
@@ -450,6 +418,69 @@
                             <phase>install</phase>
                         </execution>
                     </executions>
+                </plugin>
+
+                <!-- Manual execution: -->
+                <!-- mvn pmd:check -Dlint -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-pmd-plugin</artifactId>
+                    <version>${maven-pmd-plugin.version}</version>
+                    <configuration>
+                        <failOnViolation>true</failOnViolation>
+                        <includeTests>false</includeTests>
+                        <linkXRef>false</linkXRef>
+                        <printFailingErrors>true</printFailingErrors>
+                        <rulesets>
+                            <ruleset>${pmd-ruleset}</ruleset>
+                        </rulesets>
+                        <skip>${skip-linters}</skip>
+                        <targetJdk>${java-release}</targetJdk>
+                    </configuration>
+
+                    <!-- Overwrite the default version of PMD -->
+                    <dependencies>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-core</artifactId>
+                            <version>${pmd.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-java</artifactId>
+                            <version>${pmd.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-javascript</artifactId>
+                            <version>${pmd.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sourceforge.pmd</groupId>
+                            <artifactId>pmd-jsp</artifactId>
+                            <version>${pmd.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>install</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                    <configuration>
+                        <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+                        <skipTests>${skip-tests}</skipTests>
+                        <includes>
+                            <include>**/*Test.java</include>
+                        </includes>
+                    </configuration>
                 </plugin>
 
                 <!-- Manual execution: -->
@@ -482,57 +513,6 @@
                 </plugin>
 
                 <!-- Manual execution: -->
-                <!-- mvn pmd:check -Dlint -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-pmd-plugin</artifactId>
-                    <version>${maven-pmd-plugin.version}</version>
-
-                    <!-- Overwrite the default version of PMD -->
-                    <dependencies>
-                        <dependency>
-                            <groupId>net.sourceforge.pmd</groupId>
-                            <artifactId>pmd-core</artifactId>
-                            <version>${pmd.version}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>net.sourceforge.pmd</groupId>
-                            <artifactId>pmd-java</artifactId>
-                            <version>${pmd.version}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>net.sourceforge.pmd</groupId>
-                            <artifactId>pmd-javascript</artifactId>
-                            <version>${pmd.version}</version>
-                        </dependency>
-                        <dependency>
-                            <groupId>net.sourceforge.pmd</groupId>
-                            <artifactId>pmd-jsp</artifactId>
-                            <version>${pmd.version}</version>
-                        </dependency>
-                    </dependencies>
-                    <configuration>
-                        <failOnViolation>true</failOnViolation>
-                        <includeTests>false</includeTests>
-                        <linkXRef>false</linkXRef>
-                        <printFailingErrors>true</printFailingErrors>
-                        <rulesets>
-                            <ruleset>${pmd-ruleset}</ruleset>
-                        </rulesets>
-                        <skip>${skip-linters}</skip>
-                        <targetJdk>${java-release}</targetJdk>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                            <phase>install</phase>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <!-- Manual execution: -->
                 <!-- mvn sonar:sonar -Dsonarqube -->
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
@@ -543,10 +523,37 @@
                     </configuration>
                     <executions>
                         <execution>
-                            <phase>install</phase>
                             <goals>
                                 <goal>sonar</goal>
                             </goals>
+                            <phase>install</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- Manual execution: -->
+                <!-- mvn sortpom:sort -Dlint -->
+                <plugin>
+                    <groupId>com.github.ekryd.sortpom</groupId>
+                    <artifactId>sortpom-maven-plugin</artifactId>
+                    <version>${sortpom-maven-plugin.version}</version>
+                    <configuration>
+                        <createBackupFile>false</createBackupFile>
+                        <expandEmptyElements>false</expandEmptyElements>
+                        <indentAttribute>schemaLocation</indentAttribute>
+                        <nrOfIndentSpace>4</nrOfIndentSpace>
+                        <skip>${skip-linters}</skip>
+                        <sortDependencies>scope,artifactId</sortDependencies>
+                        <sortDependencyManagement>scope,artifactId</sortDependencyManagement>
+                        <sortExecutions>true</sortExecutions>
+                        <sortModules>true</sortModules>
+                        <sortPlugins>artifactId</sortPlugins>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>sort</goal>
+                            </goals>
+                            <phase>verify</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -563,14 +570,6 @@
                         <excludeFilterFile>${spotbugs-exclude-file}</excludeFilterFile>
                         <skip>${skip-linters}</skip>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                            <phase>install</phase>
-                        </execution>
-                    </executions>
                     <dependencies>
                         <!-- Overwrite the default version of Spotbugs -->
                         <dependency>
@@ -579,6 +578,34 @@
                             <version>${spotbugs.version}</version>
                         </dependency>
                     </dependencies>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>install</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>versions-maven-plugin</artifactId>
+                    <version>${versions-maven-plugin.version}</version>
+                    <configuration>
+                        <!-- List of dependencies to not be updated, due to incompatible versions -->
+                        <!-- If a valid update becomes available, it can be updated and removed from below -->
+                        <excludes/>
+                        <generateBackupPoms>false</generateBackupPoms>
+                        <ruleSet>
+                            <ignoreVersions>
+                                <!-- Exclude alpha, beta, milestone and SNAPSHOT releases -->
+                                <ignoreVersion>
+                                    <type>regex</type>
+                                    <version>.*(-alpha|-beta|-M\d|-SNAPSHOT).*</version>
+                                </ignoreVersion>
+                            </ignoreVersions>
+                        </ruleSet>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -592,6 +619,10 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>com.github.ekryd.sortpom</groupId>
+                <artifactId>sortpom-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
